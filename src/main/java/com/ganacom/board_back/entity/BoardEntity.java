@@ -46,6 +46,10 @@ public class BoardEntity {
         this.commentCount = 0;
         this.viewCount = 0;
         this.writerEmail = email;
-
     }
+
+    public void increaseViewCount() {
+        this.viewCount++;
+    }
+
 }

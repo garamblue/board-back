@@ -8,12 +8,14 @@ import org.springframework.stereotype.Service;
 
 import com.ganacom.board_back.dto.request.board.PostBoardRequestDto;
 import com.ganacom.board_back.dto.response.ResponseDto;
+import com.ganacom.board_back.dto.response.board.GetBoardResponseDto;
 import com.ganacom.board_back.dto.response.board.PostBoardResponseDto;
 import com.ganacom.board_back.entity.BoardEntity;
 import com.ganacom.board_back.entity.ImageEntity;
 import com.ganacom.board_back.repository.BoardRepository;
 import com.ganacom.board_back.repository.ImageRepository;
 import com.ganacom.board_back.repository.UserRepository;
+import com.ganacom.board_back.repository.resultSet.GetBoardResultSet;
 import com.ganacom.board_back.service.BoardService;
 
 import lombok.RequiredArgsConstructor;
@@ -55,6 +57,30 @@ public class BoardServiceImpl implements BoardService {
             return ResponseDto.databaseError();
         }
         return PostBoardResponseDto.success();
+    }
+
+    @Override
+    public ResponseEntity<? super GetBoardResponseDto> getBoard(Integer boardNumber) {
+        GetBoardResultSet resultSet = null;
+        List<ImageEntity> imageEntities = new ArrayList<>();
+
+        try {
+            resultSet = boardRepository.getBoard(boardNumber);
+            if (resultSet == null)
+                return GetBoardResponseDto.noExistBoard();
+
+            imageEntities = imgRepository.findByBoardNumber(boardNumber);
+
+            BoardEntity boardEntity = boardRepository.findByBoardNumber(boardNumber);
+            boardEntity.increaseViewCount();
+            boardRepository.save(boardEntity);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+
+        return GetBoardResponseDto.success(resultSet, imageEntities);
     }
 
 }
