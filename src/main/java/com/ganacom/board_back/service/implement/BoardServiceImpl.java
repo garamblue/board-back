@@ -7,20 +7,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.ganacom.board_back.dto.request.board.PostBoardRequestDto;
+import com.ganacom.board_back.dto.request.board.PostCommentRequestDto;
 import com.ganacom.board_back.dto.response.ResponseDto;
 import com.ganacom.board_back.dto.response.board.GetBoardResponseDto;
+import com.ganacom.board_back.dto.response.board.GetCommentListResponseDto;
 import com.ganacom.board_back.dto.response.board.GetFavoriteListResponseDto;
 import com.ganacom.board_back.dto.response.board.PostBoardResponseDto;
+import com.ganacom.board_back.dto.response.board.PostCommentResponseDto;
 import com.ganacom.board_back.dto.response.board.PutFavoriteResponseDto;
 import com.ganacom.board_back.entity.BoardEntity;
+import com.ganacom.board_back.entity.CommentEntity;
 import com.ganacom.board_back.entity.FavoriteEntity;
 import com.ganacom.board_back.entity.ImageEntity;
 import com.ganacom.board_back.repository.BoardRepository;
+import com.ganacom.board_back.repository.CommentRepository;
 import com.ganacom.board_back.repository.FavoriteRepository;
 import com.ganacom.board_back.repository.ImageRepository;
 import com.ganacom.board_back.repository.UserRepository;
 import com.ganacom.board_back.repository.resultSet.GetBoardResultSet;
 import com.ganacom.board_back.repository.resultSet.GetFavoriteListResultSet;
+import com.ganacom.board_back.repository.resultSet.GetCommentListResultSet;
 import com.ganacom.board_back.service.BoardService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,6 +39,7 @@ public class BoardServiceImpl implements BoardService {
     private final UserRepository userRepository;
     private final ImageRepository imgRepository;
     private final FavoriteRepository favoriteRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public ResponseEntity<? super PostBoardResponseDto> postBoard(PostBoardRequestDto dto, String email) {
@@ -139,6 +146,62 @@ public class BoardServiceImpl implements BoardService {
             return ResponseDto.databaseError();
         }
         return GetFavoriteListResponseDto.success(resultSets);
+    }
+
+    /**
+     * 댓글 목록 조회
+     */
+    @Override
+    public ResponseEntity<? super GetCommentListResponseDto> getCommentList(Integer boardNumber) {
+
+        // interface 객체 List 배열
+        List<GetCommentListResultSet> resultSets = new ArrayList<>();
+
+        try {
+            boolean existedBoard = boardRepository.existsByBoardNumber(boardNumber);
+            if (!existedBoard)
+                return GetCommentListResponseDto.noExistBoard();
+
+            resultSets = commentRepository.getCommentList(boardNumber);
+            if (resultSets == null)
+                return GetCommentListResponseDto.noExistBoard();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return GetCommentListResponseDto.success(resultSets);
+    }
+
+    /**
+     * 댓글등록 후 success return
+     */
+    @Override
+    public ResponseEntity<? super PostCommentResponseDto> postComment(
+            PostCommentRequestDto dto, Integer boardNum, String email) {
+        try {
+            // 1)exception 처리
+            BoardEntity boardEntity = boardRepository.findByBoardNumber(boardNum);
+            if (boardEntity == null)
+                return PostCommentResponseDto.notExistedBoard();
+
+            boolean existedUser = userRepository.existsByEmail(email);
+            if (!existedUser)
+                return PostCommentResponseDto.notExistedUser();
+
+            // 2)comment 등록
+            CommentEntity cmtEntity = new CommentEntity(dto, boardNum, email);
+            commentRepository.save(cmtEntity);
+
+            // 3)comment 수 증가
+            boardEntity.increaseCommentCount();
+            boardRepository.save(boardEntity);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return PostCommentResponseDto.success();
     }
 
 }

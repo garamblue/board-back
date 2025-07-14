@@ -3,9 +3,12 @@ package com.ganacom.board_back.service;
 import org.springframework.http.ResponseEntity;
 
 import com.ganacom.board_back.dto.request.board.PostBoardRequestDto;
+import com.ganacom.board_back.dto.request.board.PostCommentRequestDto;
 import com.ganacom.board_back.dto.response.board.GetBoardResponseDto;
 import com.ganacom.board_back.dto.response.board.GetFavoriteListResponseDto;
+import com.ganacom.board_back.dto.response.board.GetCommentListResponseDto;
 import com.ganacom.board_back.dto.response.board.PostBoardResponseDto;
+import com.ganacom.board_back.dto.response.board.PostCommentResponseDto;
 import com.ganacom.board_back.dto.response.board.PutFavoriteResponseDto;
 
 public interface BoardService {
@@ -15,10 +18,16 @@ public interface BoardService {
     // 좋아요 목록 조회
     ResponseEntity<? super GetFavoriteListResponseDto> getFavoriteList(Integer boardNumber);
 
+    // 댓글 목록 조회
+    ResponseEntity<? super GetCommentListResponseDto> getCommentList(Integer boardNumber);
+
     // 게시물 등록
     ResponseEntity<? super PostBoardResponseDto> postBoard(PostBoardRequestDto dto, String email);
 
     // 좋아요 등록
     ResponseEntity<? super PutFavoriteResponseDto> putFavorite(Integer boardNumber, String email);
 
+    // 댓글 등록
+    ResponseEntity<? super PostCommentResponseDto> postComment(PostCommentRequestDto dto, Integer boardNumber,
+            String email);
 }

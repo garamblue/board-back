@@ -6,7 +6,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ganacom.board_back.dto.response.board.GetBoardResponseDto;
 import com.ganacom.board_back.dto.request.board.PostBoardRequestDto;
 import com.ganacom.board_back.dto.response.board.PostBoardResponseDto;
+import com.ganacom.board_back.dto.request.board.PostCommentRequestDto;
+import com.ganacom.board_back.dto.response.board.PostCommentResponseDto;
 import com.ganacom.board_back.dto.response.board.GetFavoriteListResponseDto;
+import com.ganacom.board_back.dto.response.board.GetCommentListResponseDto;
 import com.ganacom.board_back.dto.response.board.PutFavoriteResponseDto;
 import com.ganacom.board_back.service.BoardService;
 
@@ -57,6 +60,12 @@ public class BoardController {
         return response;
     }
 
+    /**
+     * 좋아요 목록 조회
+     * 
+     * @param boardNumber
+     * @return
+     */
     @GetMapping("/{boardNumber}/favorite-list")
     public ResponseEntity<? super GetFavoriteListResponseDto> getFavoriteList(
             @PathVariable("boardNumber") Integer boardNumber) {
@@ -64,4 +73,39 @@ public class BoardController {
 
         return response;
     }
+
+    /**
+     * 댓글 목록 조회
+     * 
+     * @param boardNumber
+     * @return
+     */
+    @GetMapping("/{boardNumber}/comment-list")
+    public ResponseEntity<? super GetCommentListResponseDto> getCommentList(
+            @PathVariable("boardNumber") Integer boardNumber) {
+        ResponseEntity<? super GetCommentListResponseDto> response = boardService.getCommentList(boardNumber);
+
+        return response;
+    }
+
+    /**
+     * 댓글 등록
+     * 
+     * @param requestBody
+     * @param email
+     * @param boardNum
+     * @return
+     */
+    @PostMapping("/{boardNumber}/comment")
+    public ResponseEntity<? super PostCommentResponseDto> postComment(
+            @RequestBody @Valid PostCommentRequestDto requestBody,
+            @AuthenticationPrincipal String email,
+            @PathVariable("boardNumber") Integer boardNum) {
+
+        ResponseEntity<? super PostCommentResponseDto> response = boardService.postComment(requestBody, boardNum,
+                email);
+
+        return response;
+    }
+
 }

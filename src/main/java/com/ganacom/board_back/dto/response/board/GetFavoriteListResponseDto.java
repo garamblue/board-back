@@ -18,7 +18,7 @@ public class GetFavoriteListResponseDto extends ResponseDto {
 
     private List<FavoriteListItem> favoriteList;
 
-    // GetFavoriteListResultSet interface injection 으로 list array 포함하는 생성자로 수정
+    // GetFavoriteListResultSet interface injection 으로 list array 포함 생성자로 수정
     private GetFavoriteListResponseDto(List<GetFavoriteListResultSet> resultSets) {
         super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         this.favoriteList = FavoriteListItem.copyList(resultSets);
